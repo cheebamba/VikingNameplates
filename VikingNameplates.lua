@@ -486,7 +486,7 @@ function VikingNameplates:OnUnitCreated(unitNew) -- build main options here
       healthMaxAbsorb = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb"),
       healthAbsorbFill = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb:AbsorbFill"),
       healthMaxHealth = wnd:FindChild("Container:Health:HealthBars:MaxHealth"),
-      --healthHealthLabel = wnd:FindChild("Container:Health:HealthLabel"),
+      healthHealthLabel = wnd:FindChild("Container:Health:HealthLabel"),
       --castBarLabel = wnd:FindChild("Container:CastBar:Label"),
       castBarCastFill = wnd:FindChild("Container:CastBar:CastFill"),
       vulnerableVulnFill = wnd:FindChild("Container:Vulnerable:VulnFill"),
@@ -507,6 +507,25 @@ function VikingNameplates:OnUnitCreated(unitNew) -- build main options here
   self:DrawRewards(tNameplate)
   self:DrawThreatIndicator(tNameplate)
   self:DrawInterrupt(tNameplate)
+  self:DrawHealthLabel(tNameplate)
+end
+
+function VikingNameplates:DrawHealthLabel(tNameplate)
+
+  local unitOwner = tNameplate.unitOwner
+
+  local nHealthCurrent = unitOwner:GetHealth()
+
+  local hasHealth = true
+    -- Hit Points Text (hide if 0)
+  if not nHealthCurrent or nHealthCurrent <= 0 then 
+      nHealthCurrent = 0
+  elseif nHealthCurrent > 0 then
+    tNameplate.wnd.healthHealthLabel:Show(true)
+    nHealthPercent = (unitOwner:GetHealth() / unitOwner:GetMaxHealth()) * 100
+    tNameplate.wnd.healthHealthLabel:SetText(self:HelperFormatBigNumber(nHealthCurrent))
+  end
+
 end
 
 function VikingNameplates:OnUnitDestroyed(unitOwner)
@@ -556,7 +575,7 @@ function VikingNameplates:DrawNameplate(tNameplate)
   self:DrawHealth(tNameplate)
 
   local nCon = self:HelperCalculateConValue(unitOwner)
-  tNameplate.wnd.certainDeath:Show(self.bShowCertainDeathMain and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
+  tNameplate.wnd.certainDeath:Show(self.bShowCertainDeathMain and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
   tNameplate.wnd.targetScalingMark:Show(unitOwner:IsScaled())
 
   self:DrawRewards(tNameplate)
@@ -565,6 +584,7 @@ function VikingNameplates:DrawNameplate(tNameplate)
   self:ColorNameplate(tNameplate)
   self:DrawThreatIndicator(tNameplate)
   self:DrawInterrupt(tNameplate)
+  -- self:DrawHealthLabel(tNameplate)
 end
 
 function VikingNameplates:ColorNameplate(tNameplate)
@@ -980,7 +1000,7 @@ function VikingNameplates:HelperDoHealthShieldBar(wndHealth, unitOwner, eDisposi
   local nVulnerabilityTime = unitOwner:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability)
 
   if unitOwner:GetType() == "Simple" or unitOwner:GetHealth() == nil then
-    --tNameplate.wnd.healthHealthLabel:SetText("")
+    -- tNameplate.wnd.healthHealthLabel:SetText("")
     return
   end
 
@@ -1072,7 +1092,7 @@ function VikingNameplates:HelperDoHealthShieldBar(wndHealth, unitOwner, eDisposi
   if nShieldMax > 0 and nShieldCurr > 0 then
     strText = String_GetWeaselString(Apollo.GetString("TargetFrame_HealthShieldText"), strText, strShieldCurr)
   end
-  --tNameplate.wnd.healthHealthLabel:SetText(strText)
+  -- tNameplate.wnd.healthHealthLabel:SetText(strText)
 
   --[[
   elseif nHealthCurr / nHealthMax < .3 then
